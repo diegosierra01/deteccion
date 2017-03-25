@@ -1,31 +1,37 @@
-# Algoritmo de deteccion de triangulos
-# Por Glar3
-#
-#
-# Detecta triangulos azules
-
 # Librerias
 import cv2
 import numpy as np
-# Iniciar camara
-# captura = cv2.VideoCapture(0)
-
-
-# while(1):
 
 # Caputrar una imagen y convertirla a hsv
-imagen = cv2.imread('figuras.png')
+# imagen = cv2.imread('figuras.jpg')
+imagen = cv2.imread('colores.png')
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
-# Guardamos el rango de colores hsv (azules)
-bajos = np.array([67, 40, 105], dtype=np.uint8)
-altos = np.array([129, 255, 182], dtype=np.uint8)
+# Rango de colores detectados:
+# Verdes:
+verde_bajos = np.array([49, 50, 50])
+verde_altos = np.array([107, 255, 255])
+# Azules:
+azul_bajos = np.array([100, 65, 75], dtype=np.uint8)
+azul_altos = np.array([130, 255, 255], dtype=np.uint8)
+# Rojos:
+rojo_bajos1 = np.array([0, 65, 75], dtype=np.uint8)
+rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
+rojo_bajos2 = np.array([240, 65, 75], dtype=np.uint8)
+rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
 
-# Crear una mascara que detecte los colores
-mask = cv2.inRange(hsv, bajos, altos)
+# Crear las mascaras
+mascara_verde = cv2.inRange(hsv, verde_bajos, verde_altos)
+mascara_rojo1 = cv2.inRange(hsv, rojo_bajos1, rojo_altos1)
+mascara_rojo2 = cv2.inRange(hsv, rojo_bajos2, rojo_altos2)
+mascara_azul = cv2.inRange(hsv, azul_bajos, azul_altos)
 
 # Filtrar el ruido con un CLOSE seguido de un OPEN
+# Juntar todas las mascaras
 kernel = np.ones((6, 6), np.uint8)
+mask = cv2.add(mascara_rojo1, mascara_rojo2)
+mask = cv2.add(mask, mascara_verde)
+mask = cv2.add(mask, mascara_azul)
 mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
@@ -44,12 +50,12 @@ for extension in areas:
     cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
     i = i + 1
 
-# Mostrar la mascara final y la imagen
-cv2.imshow('Finale', mask)
-cv2.imshow('Imagen', imagen)
 
 # Salir con ESC
 while(1):
+    # Mostrar la mascara final y la imagen
+    cv2.imshow('Finale', mask)
+    cv2.imshow('Imagen', imagen)
     tecla = cv2.waitKey(5) & 0xFF
     if tecla == 27:
         break
