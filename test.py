@@ -9,8 +9,8 @@ hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
 # Rango de colores detectados:
 # Verdes:
-verde_bajos = np.array([49, 50, 50])
-verde_altos = np.array([107, 255, 255])
+verde_bajos = np.array([49, 50, 50], dtype=np.uint8)
+verde_altos = np.array([100, 255, 210], dtype=np.uint8)
 # Azules:
 azul_bajos = np.array([100, 65, 75], dtype=np.uint8)
 azul_altos = np.array([130, 255, 255], dtype=np.uint8)
@@ -19,21 +19,22 @@ rojo_bajos1 = np.array([0, 65, 75], dtype=np.uint8)
 rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
 rojo_bajos2 = np.array([240, 65, 75], dtype=np.uint8)
 rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
+# Amarillos:
+amarillo_bajos = np.array([16, 76, 72], dtype=np.uint8)
+amarillo_altos = np.array([30, 255, 210], dtype=np.uint8)
 
 # Crear las mascaras
 mascara_verde = cv2.inRange(hsv, verde_bajos, verde_altos)
 mascara_rojo1 = cv2.inRange(hsv, rojo_bajos1, rojo_altos1)
 mascara_rojo2 = cv2.inRange(hsv, rojo_bajos2, rojo_altos2)
 mascara_azul = cv2.inRange(hsv, azul_bajos, azul_altos)
+mascara_amarillo = cv2.inRange(hsv, amarillo_bajos, amarillo_altos)
 
-# Filtrar el ruido con un CLOSE seguido de un OPEN
 # Juntar todas las mascaras
-kernel = np.ones((6, 6), np.uint8)
 mask = cv2.add(mascara_rojo1, mascara_rojo2)
+mask = cv2.add(mask, mascara_amarillo)
 mask = cv2.add(mask, mascara_verde)
 mask = cv2.add(mask, mascara_azul)
-mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
 # Difuminamos la mascara para suavizar los contornos y aplicamos filtro canny
 blur = cv2.GaussianBlur(mask, (5, 5), 0)
