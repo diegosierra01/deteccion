@@ -3,8 +3,9 @@ import cv2
 import numpy as np
 
 # Caputrar una imagen y convertirla a hsv
-# imagen = cv2.imread('figuras.png')
-imagen = cv2.imread('colores.png')
+imagen = cv2.imread('figuras.png')
+# imagen = cv2.imread('colores.png')
+# imagen = cv2.imread('cuadrado.png')
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
 # Rango de colores detectados:
@@ -60,7 +61,10 @@ for extension in areas:
     cv2.drawContours(imagen, [actual], 0, (0, 0, 255), 2)
     cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
     i = i + 1
-
+    print('-----------------Coordenadas----------------')
+    print('Figura ' + str(i) + ': ')
+    print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
+    print()
 
 # Salir con ESC
 while(1):
