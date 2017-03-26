@@ -11,7 +11,9 @@ centro de gravedad, de alguna(s) de sus figuras.
 
 [Detección de triángulos con OpenCV y Python](http://robologs.net/2015/01/25/deteccion-de-triangulos-con-opencv-y-python/)
 
+[Instalacion de matplotlib] pip install matplotlib
 
+[Instalacion de pillow] pip install pillow
 
 
 
