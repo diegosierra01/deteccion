@@ -35,10 +35,7 @@ morado_altos = np.array([150, 255, 255], dtype=np.uint8)
 naranja_bajos = np.array([5, 50, 50], dtype=np.uint8)
 naranja_altos = np.array([15, 255, 255], dtype=np.uint8)
 
-todos_bajos = np.array([128, 128, 128], dtype=np.uint8)
-todos_altos = np.array([192, 192, 192], dtype=np.uint8)
 # Crear las mascaras
-mascara_todos = cv2.inRange(hsv, todos_bajos, todos_altos)
 mascara_verde = cv2.inRange(hsv, verde_bajos, verde_altos)
 mascara_rojo1 = cv2.inRange(hsv, rojo_bajos1, rojo_altos1)
 mascara_rojo2 = cv2.inRange(hsv, rojo_bajos2, rojo_altos2)
@@ -54,7 +51,6 @@ mask = cv2.add(mask, mascara_verde)
 mask = cv2.add(mask, mascara_azul)
 mask = cv2.add(mask, mascara_morado)
 mask = cv2.add(mask, mascara_naranja)
-mask = cv2.add(mask, mascara_todos)
 
 # Difuminamos la mascara para suavizar los contornos y aplicamos filtro canny
 blur = cv2.GaussianBlur(mask, (5, 5), 0)
