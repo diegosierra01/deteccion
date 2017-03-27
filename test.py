@@ -5,7 +5,7 @@ from random import randint
 import math
 from PIL import Image, ImageDraw
 # Caputrar una imagen y convertirla a hsv
-archivo = 'mapa4.png'
+archivo = 'figuras.png'
 imagen = cv2.imread(archivo)
 # imagen = cv2.imread('colores.png')
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
