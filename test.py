@@ -5,10 +5,11 @@ from random import randint
 import math
 from PIL import Image, ImageDraw
 # Caputrar una imagen y convertirla a hsv
-archivo = 'cuadrado.png'
+# archivo = 'cuadrado.png'
 # archivo = 'figuras.png'
 # archivo = 'colores.png'
 # archivo = 'mapa4.png'
+archivo = 'irregulares.jpg'
 
 imagen = cv2.imread(archivo)
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
@@ -78,11 +79,13 @@ for extension in areas:
 
 # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
 # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
-for contour in contours:
+for actual in contours:
+    # if cv2.contourArea(actual) > 10:
+    approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
     xmax = 0
     ymax = 0
     xmin, ymin, channels = imagen.shape
-    for points in contour:
+    for points in approx:
         if xmax < points[:, 0]:
             xmax = points[:, 0]
         if xmin > points[:, 0]:
@@ -104,7 +107,7 @@ for contour in contours:
         xa = randint(xmin, xmax)
         ya = randint(ymin, ymax)
         # Se calculan las distancias entre el punto aleatorio y los puntos de referencia
-        for p in contour:
+        for p in approx:
             distance = math.sqrt(pow(p[:, 0] - xa, 2) + pow(p[:, 1] - ya, 2))
             distancelist.append(distance)
         # Si la diferencia de distancias es menor a la establecida, se guarda el punto
@@ -123,9 +126,10 @@ for contour in contours:
     averagey = summationy / len(pointslist)
 
     print('Centro geometrico -> x: ' + str(averagex) + 'y: ' + str(averagey))
-    dibujo.point((averagex, averagey), fill="white")
-    dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
-                font=None, fill=(255, 255, 255, 255))
+    # dibujo.point((averagex, averagey), fill="white")
+    # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
+    #             font=None, fill=(255, 255, 255, 255))
+    dibujo.text((averagex, averagey), 'x', fill="black")
 
 
 imagenres.save("linea.png")
