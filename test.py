@@ -5,12 +5,13 @@ from random import randint
 import math
 from PIL import Image, ImageDraw
 # Caputrar una imagen y convertirla a hsv
-imagen = cv2.imread('rompecabezas3.jpg')
+archivo = 'mapa4.png'
+imagen = cv2.imread(archivo)
 # imagen = cv2.imread('colores.png')
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
 # Imagen resultado
-imagenres = Image.open("rompecabezas3.jpg")
+imagenres = Image.open(archivo)
 dibujo = ImageDraw.Draw(imagenres)
 
 # Rango de colores detectados:
@@ -61,17 +62,18 @@ _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIM
 areas = [cv2.contourArea(c) for c in contours]
 i = 0
 for extension in areas:
-    actual = contours[i]
-    approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
-    cv2.drawContours(imagen, [actual], 0, (0, 0, 255), 2)
-    cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
-    i = i + 1
-    print('-----------------Coordenadas----------------')
-    print('Figura ' + str(i) + ': ')
-    print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
-    print()
+    if extension > 600:
+        actual = contours[i]
+        approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
+        cv2.drawContours(imagen, [actual], 0, (0, 0, 255), 2)
+        cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
+        i = i + 1
+        print('-----------------Coordenadas----------------')
+        print('Figura ' + str(i) + ': ')
+        print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
+        print()
 
-#fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
+# fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
 # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
 for contour in contours:
     xmax = 0
@@ -86,7 +88,7 @@ for contour in contours:
             ymax = points[:, 1]
         if ymin > points[:, 1]:
             ymin = points[:, 1]
-    #print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
+    # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
     if xmax - xmin > ymax - ymin:
         differencemax = (xmax - xmin / 2) + 10
     else:
@@ -109,7 +111,7 @@ for contour in contours:
     # Se calcula el promedio de los puntos validos
     summationx = 0
     summationy = 0
-    #print('longitud lista '+str(len(pointslist)))
+    # print('longitud lista '+str(len(pointslist)))
     for x, y in pointslist:
         # print(str(y[0]))
         summationx += x
