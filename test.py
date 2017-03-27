@@ -5,9 +5,12 @@ from random import randint
 import math
 from PIL import Image, ImageDraw
 # Caputrar una imagen y convertirla a hsv
-archivo = 'figuras.png'
+archivo = 'cuadrado.png'
+# archivo = 'figuras.png'
+# archivo = 'colores.png'
+# archivo = 'mapa4.png'
+
 imagen = cv2.imread(archivo)
-# imagen = cv2.imread('colores.png')
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
 
 # Imagen resultado
@@ -62,16 +65,16 @@ _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIM
 areas = [cv2.contourArea(c) for c in contours]
 i = 0
 for extension in areas:
-    if extension > 600:
-        actual = contours[i]
-        approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
-        cv2.drawContours(imagen, [actual], 0, (0, 0, 255), 2)
-        cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
-        i = i + 1
-        print('-----------------Coordenadas----------------')
-        print('Figura ' + str(i) + ': ')
-        print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
-        print()
+    # if extension > 600:
+    actual = contours[i]
+    approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
+    cv2.drawContours(imagen, [actual], 0, (0, 0, 255), 2)
+    cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
+    i = i + 1
+    print('-----------------Coordenadas----------------')
+    print('Figura ' + str(i) + ': ')
+    print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
+    print()
 
 # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
 # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
