@@ -124,16 +124,16 @@ for contour in contours:
     dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
                 font=None, fill=(255, 255, 255, 255))
 
-imagenres.show()
+
 imagenres.save("linea.png")
 imagenres = cv2.imread('linea.png')
 
 # Salir con ESC
 while(1):
     # Mostrar la mascara final y la imagen
-    cv2.imshow('Finale', mask)
-    cv2.imshow('Imagen', imagen)
-    cv2.imshow('ImagenR', imagenres)
+    cv2.imshow('Figuras detectadas', mask)
+    cv2.imshow('Imagen original', imagen)
+    cv2.imshow('Centros geometricos', imagenres)
     tecla = cv2.waitKey(5) & 0xFF
     if tecla == 27:
         break
