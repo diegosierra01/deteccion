@@ -10,6 +10,7 @@ from PIL import Image, ImageDraw
 # archivo = 'colores.png'
 # archivo = 'mapa4.png'
 archivo = 'irregulares.jpg'
+# archivo = 'rompecabezas3.jpg'
 
 imagen = cv2.imread(archivo)
 hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
@@ -79,57 +80,58 @@ for extension in areas:
 
 # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
 # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
-for actual in contours:
-    # if cv2.contourArea(actual) > 10:
-    approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
-    xmax = 0
-    ymax = 0
-    xmin, ymin, channels = imagen.shape
-    for points in approx:
-        if xmax < points[:, 0]:
-            xmax = points[:, 0]
-        if xmin > points[:, 0]:
-            xmin = points[:, 0]
-        if ymax < points[:, 1]:
-            ymax = points[:, 1]
-        if ymin > points[:, 1]:
-            ymin = points[:, 1]
-    # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
-    if xmax - xmin > ymax - ymin:
-        differencemax = (xmax - xmin / 2) + 10
-    else:
-        differencemax = (ymax - ymin / 2) + 10
-    experiments = 100
-    randomDictionary = {}
-    for i in range(experiments):
-        distancelist = []
-        # Se genera un punto aleatorio (x,y)
-        xa = randint(xmin, xmax)
-        ya = randint(ymin, ymax)
-        # Se calculan las distancias entre el punto aleatorio y los puntos de referencia
-        for p in approx:
-            distance = math.sqrt(pow(p[:, 0] - xa, 2) + pow(p[:, 1] - ya, 2))
-            distancelist.append(distance)
-        # Si la diferencia de distancias es menor a la establecida, se guarda el punto
-        if (max(distancelist) - min(distancelist)) <= differencemax:
-            randomDictionary[xa] = [ya]
-    pointslist = randomDictionary.items()
-    # Se calcula el promedio de los puntos validos
-    summationx = 0
-    summationy = 0
-    # print('longitud lista '+str(len(pointslist)))
-    for x, y in pointslist:
-        # print(str(y[0]))
-        summationx += x
-        summationy += y[0]
-    averagex = summationx / len(pointslist)
-    averagey = summationy / len(pointslist)
+experiments = 1000
 
-    print('Centro geometrico -> x: ' + str(averagex) + 'y: ' + str(averagey))
-    # dibujo.point((averagex, averagey), fill="white")
-    # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
-    #             font=None, fill=(255, 255, 255, 255))
-    dibujo.text((averagex, averagey), 'x', fill="black")
+for actual in contours:
+    if cv2.contourArea(actual) > 10:
+        approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
+        xmax = 0
+        ymax = 0
+        xmin, ymin, channels = imagen.shape
+        for points in approx:
+            if xmax < points[:, 0]:
+                xmax = points[:, 0]
+            if xmin > points[:, 0]:
+                xmin = points[:, 0]
+            if ymax < points[:, 1]:
+                ymax = points[:, 1]
+            if ymin > points[:, 1]:
+                ymin = points[:, 1]
+        # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
+        if xmax - xmin > ymax - ymin:
+            differencemax = (xmax - xmin / 2) + 10
+        else:
+            differencemax = (ymax - ymin / 2) + 10
+        randomDictionary = {}
+        for i in range(experiments):
+            distancelist = []
+            # Se genera un punto aleatorio (x,y)
+            xa = randint(xmin, xmax)
+            ya = randint(ymin, ymax)
+            # Se calculan las distancias entre el punto aleatorio y los puntos de referencia
+            for p in approx:
+                distance = math.sqrt(pow(p[:, 0] - xa, 2) + pow(p[:, 1] - ya, 2))
+                distancelist.append(distance)
+            # Si la diferencia de distancias es menor a la establecida, se guarda el punto
+            if (max(distancelist) - min(distancelist)) <= differencemax:
+                randomDictionary[xa] = [ya]
+        pointslist = randomDictionary.items()
+        # Se calcula el promedio de los puntos validos
+        summationx = 0
+        summationy = 0
+        # print('longitud lista '+str(len(pointslist)))
+        for x, y in pointslist:
+            # print(str(y[0]))
+            summationx += x
+            summationy += y[0]
+        averagex = summationx / len(pointslist)
+        averagey = summationy / len(pointslist)
+
+        print('Centro geometrico -> x: ' + str(averagex) + 'y: ' + str(averagey))
+        # dibujo.point((averagex, averagey), fill="white")
+        # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
+        #             font=None, fill=(255, 255, 255, 255))
+        dibujo.text((averagex, averagey), 'x', fill="black")
 
 
 imagenres.save("linea.png")
