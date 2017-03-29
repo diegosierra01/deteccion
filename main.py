@@ -1,20 +1,31 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+ 
+# Convierte temperaturas
+# /usr/lib/x86_64-linux-gnu/qt5/bin/designer
+# www.pythondiario.com
+ 
 import sys
-from PyQt4 import QtGui, uic
+from PyQt4 import QtCore, QtGui, uic
 import cv2
 import numpy as np
 from random import randint
 import math
 from PIL import Image, ImageDraw
 
-
 class Montecarlo:
 
-    centrosGeometricos = []
+    centrosGeometricos = [] 
     esquinasFiguras = []
 
     def abrirImagen(self, ruta):
+        #archivo = 'mapa4.png'
         self.archivo = ruta
         self.imagen = cv2.imread(self.archivo)
+        # Imagen resultado
+        #self.imagenres = Image.open(self.archivo)
+        #self.dibujo = ImageDraw.Draw(self.imagenres)
+
 
     def buscarContornos(self):
         hsv = cv2.cvtColor(self.imagen, cv2.COLOR_BGR2HSV)
@@ -59,10 +70,11 @@ class Montecarlo:
 
         # Difuminamos la mascara para suavizar los contornos y aplicamos filtro canny
         blur = cv2.GaussianBlur(mask, (5, 5), 0)
-        edges = cv2.Canny(blur, 1, 2)
+        edges = cv2.Canny(mask, 1, 2)
 
-        # Extracción de contornos por figura
+        # Si el area blanca de la mascara es superior a 500px, no se trata de ruido
         _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        #contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours, mask
 
@@ -70,15 +82,22 @@ class Montecarlo:
         areas = [cv2.contourArea(c) for c in contours]
         i = 0
         for extension in areas:
+            # if extension > 600:
             actual = contours[i]
             approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
+            #cv2.drawContours(self.imagen, [actual], 0, (0, 0, 255), 2)
+            #cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
             i = i + 1
             print('-----------------Coordenadas----------------')
             print('Figura ' + str(i) + ': ')
             print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
-            print()
+            print()        
+
 
     def calcularCentros(self, contours, numExperiments):
+
+
+        # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
         # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
         experiments = numExperiments
 
@@ -97,7 +116,7 @@ class Montecarlo:
                         ymax = points[:, 1]
                     if ymin > points[:, 1]:
                         ymin = points[:, 1]
-
+                # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
                 self.esquinasFiguras.append([xmin, ymin, xmax, ymax])
                 if xmax - xmin > ymax - ymin:
                     differencemax = (xmax - xmin / 2) + 10
@@ -120,6 +139,7 @@ class Montecarlo:
                 # Se calcula el promedio de los puntos validos
                 summationx = 0
                 summationy = 0
+                # print('longitud lista '+str(len(pointslist)))
                 for x, y in pointslist:
                     # print(str(y[0]))
                     summationx += x
@@ -128,22 +148,31 @@ class Montecarlo:
                 averagey = summationy / len(pointslist)
 
                 print('Centro geometrico -> x: ' + str(averagex) + 'y: ' + str(averagey))
+                # dibujo.point((averagex, averagey), fill="white")
+                # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
+                #             font=None, fill=(255, 255, 255, 255))
+                #self.dibujo.text((averagex, averagey), 'x', fill="black")
                 self.centrosGeometricos.append([averagex, averagey])
 
-    def procesar(self, rutaImagen, numExperiments):
 
+        #self.imagenres.save("linea.png")
+        #self.imagenres = cv2.imread('linea.png')
+
+    def procesar(self, rutaImagen, numExperiments):
+        
         self.abrirImagen(rutaImagen)
         contours, mask = self.buscarContornos()
         self.calcularAreas(contours, mask)
         self.calcularCentros(contours, numExperiments)
-
+        
         cv2.namedWindow("Centros geometricos")
-        cv2.setMouseCallback("Centros geometricos", self.mouse)
+        cv2.setMouseCallback( "Centros geometricos", self.mouse);
         # Salir con ESC
         while(1):
             # Mostrar la mascara final y la imagen
-            # cv2.imshow('Figuras detectadas', mask)
+            #cv2.imshow('Figuras detectadas', mask)
             cv2.imshow('Centros geometricos', self.imagen)
+            #cv2.imshow('Centros geometricos', self.imagenres)
             tecla = cv2.waitKey(5) & 0xFF
             if tecla == 27:
                 break
@@ -153,13 +182,14 @@ class Montecarlo:
     def mouse(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
 
-            # inicializamos el dibujo
+            #inicializamos el dibujo
             imagenres = Image.open(self.archivo)
             dibujo = ImageDraw.Draw(imagenres)
 
+            #print self.areas[0][0][0]
             i = 0
             for esquina in self.esquinasFiguras:
-                if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]:  # El clic esta dentro del perimetro
+                if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]: # El clic esta dentro del perimetro
                     centro = self.centrosGeometricos[i]
                     dibujo.text((centro[0], centro[1]), 'x', fill="black")
                     pass
@@ -170,29 +200,32 @@ class Montecarlo:
             imagenres.save("linea.png")
             self.imagen = cv2.imread('linea.png')
 
-
+ 
 # Cargar nuestro archivo .ui
 form_class = uic.loadUiType("test1.ui")[0]
-
-
+ 
 class MyWindowClass(QtGui.QMainWindow, form_class):
-    def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
-        self.setupUi(self)
-        self.cargarBoton.clicked.connect(self.cargarBoton_clicked)
+ def __init__(self, parent=None):
+  QtGui.QMainWindow.__init__(self, parent)
+  self.setupUi(self)
+  self.cargarBoton.clicked.connect(self.cargarBoton_clicked)
+  self.actualizar.clicked.connect(self.actualizar_clicked)
+  self.montecarlo = Montecarlo()
+ 
+ # Evento del boton btn_CtoF
+ def cargarBoton_clicked(self):
+  self.actualizar.setEnabled(True)
+  numExperimentos = self.numExperimentos.text()
+  imagen = 'img/' +self.srcImg.text()
+  numExperiments = int(numExperimentos);
+  fileImg = str(imagen);
+  self.montecarlo.procesar(fileImg, numExperiments)
+ def actualizar_clicked(self):
+  self.montecarlo.procesar(str(self.srcImg.text()), int(self.numExperimentos.text()))
 
-    # Evento del boton btn_CtoF
-    def cargarBoton_clicked(self):
-        numExperimentos = self.numExperimentos.text()
-        imagen = 'img/' + self.srcImg.text()
-        print(numExperimentos)
-        print(imagen)
-        numExperiments = int(numExperimentos)
-        fileImg = str(imagen)
-        montecarlo = Montecarlo()
-        montecarlo.procesar(fileImg, numExperiments)
 
 
+ 
 app = QtGui.QApplication(sys.argv)
 MyWindow = MyWindowClass(None)
 MyWindow.show()
