@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw
 
 class Montecarlo:
 
+    centrosGeometricos = []
+
     def abrirImagen(self, ruta):
         #archivo = 'mapa4.png'
         archivo = ruta
@@ -21,6 +23,7 @@ class Montecarlo:
         # Imagen resultado
         self.imagenres = Image.open(archivo)
         self.dibujo = ImageDraw.Draw(self.imagenres)
+
 
     def buscarContornos(self):
         hsv = cv2.cvtColor(self.imagen, cv2.COLOR_BGR2HSV)
@@ -81,16 +84,17 @@ class Montecarlo:
             actual = contours[i]
             approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
             cv2.drawContours(self.imagen, [actual], 0, (0, 0, 255), 2)
-            cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
+            #cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
             i = i + 1
             print('-----------------Coordenadas----------------')
             print('Figura ' + str(i) + ': ')
             print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
-            print()
+            print()        
         return approx
 
 
     def calcularCentros(self, approx, contours):
+
 
         # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
         # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
@@ -145,12 +149,12 @@ class Montecarlo:
                 # dibujo.point((averagex, averagey), fill="white")
                 # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
                 #             font=None, fill=(255, 255, 255, 255))
-                self.dibujo.text((averagex, averagey), 'x', fill="black")
+                #self.dibujo.text((averagex, averagey), 'x', fill="black")
+                self.centrosGeometricos.append([averagex, averagey])
 
 
         self.imagenres.save("linea.png")
         self.imagenres = cv2.imread('linea.png')
-
 
     def procesar(self, rutaImagen):
 
@@ -158,18 +162,27 @@ class Montecarlo:
         contours, mask = self.buscarContornos()
         areas = self.calcularAreas(contours, mask)
         self.calcularCentros(areas, contours)
-
+        
+        cv2.namedWindow("Centros geometricos")
+        cv2.setMouseCallback( "Centros geometricos", self.mouse);
         # Salir con ESC
         while(1):
             # Mostrar la mascara final y la imagen
-            cv2.imshow('Figuras detectadas', mask)
-            cv2.imshow('Imagen original', self.imagen)
+            #cv2.imshow('Figuras detectadas', mask)
+            #cv2.imshow('Imagen original', self.imagen)
             cv2.imshow('Centros geometricos', self.imagenres)
             tecla = cv2.waitKey(5) & 0xFF
             if tecla == 27:
                 break
 
         cv2.destroyAllWindows()
+
+    def mouse(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            print x
+            print y
+            print " "
+
 
 
 
