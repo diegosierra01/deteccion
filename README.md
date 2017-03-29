@@ -15,6 +15,11 @@ centro de gravedad, de alguna(s) de sus figuras.
 
 [Instalacion de pillow] pip install pillow
 
+[Instalacion componente grafico Qt]
+sudo apt-get install python3-pyqt4
+sudo apt-get install python3-pyqt4.qtsql
+sudo apt-get install qttools4-dev-tools
+
 
 
 
