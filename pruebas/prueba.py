@@ -7,7 +7,7 @@ import time
 def meanShift():
 
 	#img = cv2.imread('deteccion/figuras.png')
-	img = cv2.imread('deteccion/mapa4.png')
+	img = cv2.imread('figuras.png')
 
 	img = cv2.resize(img,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
 
@@ -17,7 +17,7 @@ def meanShift():
 	resultado = cv2.pyrMeanShiftFiltering(img, 25, 40, 3)
 	#cv2.imshow("primera", resultado)
 
-	cantidadFiltros = 1
+	cantidadFiltros = 0
 	for x in xrange(0,cantidadFiltros):
 		resultado = cv2.pyrMeanShiftFiltering(resultado, 25, 35, 3)
 		pass
@@ -29,7 +29,8 @@ def meanShift():
 	
 	ret,thresh = cv2.threshold(imgray,127,255,0)
 	
-	im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	#im2, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+	contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
 	cv2.drawContours(resultado, contours, -1, (0,255,0), 3)
 
@@ -85,32 +86,42 @@ def meanShift():
 	edges = cv2.Canny(mask, 1, 2)
 
 	# Si el area blanca de la mascara es superior a 500px, no se trata de ruido
-	#contours, hier = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	sfs, contours, hier = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	cv2.drawContours(resultado, contours, -1, (0,255,0), 3)
+	contours, hier = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	#sfs, contours, hier = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	#cv2.drawContours(resultado, contours, -1, (0,255,0), 3)
 
 	#cv2.imshow("Bordes", bordes)
 	#cv2.imshow("Ultima", imgray)
 	#cv2.imshow("Ultima", resultado)
-	cv2.imshow("Ultima", resultado)
+	
 
 	plt.subplot(411)
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	plt.hist(img.ravel(),256,[0,256])
+	#plt.hist(img.ravel(),256,[0,256])
 
 
 	plt.subplot(412)
-	plt.hist(img.ravel(),256,[0,256])
+	#plt.hist(img.ravel(),256,[0,256])
 
 	plt.subplot(413)
 	#plt.hist(gray_image.ravel(),256,[0,256])
-	plt.hist(resultado.ravel(),256,[0,256])
+	#plt.hist(resultado.ravel(),256,[0,256])
 
 	plt.subplot(414)
 	plt.hist(imgray.ravel(),256,[0,256])
 	print("--- %s seconds ---" % (time.time() - start_time))
 
-	plt.show()
+	#plt.show()
+
+		# Salir con ESC
+	while(1):
+	    # Mostrar la mascara final y la imagen
+	    cv2.imshow("Ultima", resultado)
+	    tecla = cv2.waitKey(5) & 0xFF
+	    if tecla == 27:
+	        break
+
+	cv2.destroyAllWindows()
 
 
 start_time = time.time()

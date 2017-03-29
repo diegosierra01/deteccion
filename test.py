@@ -14,15 +14,16 @@ from PIL import Image, ImageDraw
 
 class Montecarlo:
 
-    centrosGeometricos = []
+    centrosGeometricos = [] 
+    esquinasFiguras = []
 
     def abrirImagen(self, ruta):
         #archivo = 'mapa4.png'
-        archivo = ruta
-        self.imagen = cv2.imread(archivo)
+        self.archivo = ruta
+        self.imagen = cv2.imread(self.archivo)
         # Imagen resultado
-        self.imagenres = Image.open(archivo)
-        self.dibujo = ImageDraw.Draw(self.imagenres)
+        #self.imagenres = Image.open(self.archivo)
+        #self.dibujo = ImageDraw.Draw(self.imagenres)
 
 
     def buscarContornos(self):
@@ -83,17 +84,16 @@ class Montecarlo:
             # if extension > 600:
             actual = contours[i]
             approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
-            cv2.drawContours(self.imagen, [actual], 0, (0, 0, 255), 2)
+            #cv2.drawContours(self.imagen, [actual], 0, (0, 0, 255), 2)
             #cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
             i = i + 1
             print('-----------------Coordenadas----------------')
             print('Figura ' + str(i) + ': ')
             print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
             print()        
-        return approx
 
 
-    def calcularCentros(self, approx, contours):
+    def calcularCentros(self, contours):
 
 
         # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
@@ -116,6 +116,7 @@ class Montecarlo:
                     if ymin > points[:, 1]:
                         ymin = points[:, 1]
                 # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
+                self.esquinasFiguras.append([xmin, ymin, xmax, ymax])
                 if xmax - xmin > ymax - ymin:
                     differencemax = (xmax - xmin / 2) + 10
                 else:
@@ -153,15 +154,15 @@ class Montecarlo:
                 self.centrosGeometricos.append([averagex, averagey])
 
 
-        self.imagenres.save("linea.png")
-        self.imagenres = cv2.imread('linea.png')
+        #self.imagenres.save("linea.png")
+        #self.imagenres = cv2.imread('linea.png')
 
     def procesar(self, rutaImagen):
 
         self.abrirImagen(rutaImagen)
         contours, mask = self.buscarContornos()
-        areas = self.calcularAreas(contours, mask)
-        self.calcularCentros(areas, contours)
+        self.calcularAreas(contours, mask)
+        self.calcularCentros(contours)
         
         cv2.namedWindow("Centros geometricos")
         cv2.setMouseCallback( "Centros geometricos", self.mouse);
@@ -169,8 +170,8 @@ class Montecarlo:
         while(1):
             # Mostrar la mascara final y la imagen
             #cv2.imshow('Figuras detectadas', mask)
-            #cv2.imshow('Imagen original', self.imagen)
-            cv2.imshow('Centros geometricos', self.imagenres)
+            cv2.imshow('Centros geometricos', self.imagen)
+            #cv2.imshow('Centros geometricos', self.imagenres)
             tecla = cv2.waitKey(5) & 0xFF
             if tecla == 27:
                 break
@@ -179,9 +180,27 @@ class Montecarlo:
 
     def mouse(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            print x
-            print y
-            print " "
+
+            #inicializamos el dibujo
+            imagenres = Image.open(self.archivo)
+            dibujo = ImageDraw.Draw(imagenres)
+
+            #print self.areas[0][0][0]
+            i = 0
+            for esquina in self.esquinasFiguras:
+                if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]: # El clic esta dentro del perimetro
+                    centro = self.centrosGeometricos[i]
+                    dibujo.text((centro[0], centro[1]), 'x', fill="black")
+                    pass
+                pass
+                i += 1
+
+            # Guardamos el dibujo
+            imagenres.save("linea.png")
+            self.imagen = cv2.imread('linea.png')
+
+
+            
 
 
 
