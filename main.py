@@ -141,7 +141,7 @@ class Montecarlo:
         # Salir con ESC
         while(1):
             # Mostrar la mascara final y la imagen
-            # cv2.imshow('Figuras detectadas', mask)
+            cv2.imshow('Figuras detectadas', mask)
             cv2.imshow('Centros geometricos', self.imagen)
             tecla = cv2.waitKey(5) & 0xFF
             if tecla == 27:
@@ -171,7 +171,7 @@ class Montecarlo:
             self.imagen = cv2.imread('linea.png')
 
 
-# Cargar nuestro archivo .ui
+# Cargar nuestro archivo .uic
 form_class = uic.loadUiType("test1.ui")[0]
 
 
