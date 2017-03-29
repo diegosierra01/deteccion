@@ -1,0 +1,7 @@
+https://www.youtube.com/watch?v=23Tpy-U9tZ0 - PARA INSTALAR LO DE LA INTERFAZ
+
+
+
+sudo apt-get install python3-pyqt5
+sudo apt-get install python3-pyqt5.qtsql
+sudo apt-get install qttools5-dev-tools
