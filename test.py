@@ -4,27 +4,16 @@ import numpy as np
 from random import randint
 import math
 from PIL import Image, ImageDraw
-# Caputrar una imagen y convertirla a hsv
-# archivo = 'cuadrado.png'
-#archivo = 'mapa4.png'
-# archivo = 'colores.png'
-# archivo = 'mapa4.png'
-#archivo = 'irregulares.jpg'
-# archivo = 'rompecabezas3.jpg'
+
 
 class Montecarlo:
 
-    centrosGeometricos = [] 
+    centrosGeometricos = []
     esquinasFiguras = []
 
     def abrirImagen(self, ruta):
-        #archivo = 'mapa4.png'
         self.archivo = ruta
         self.imagen = cv2.imread(self.archivo)
-        # Imagen resultado
-        #self.imagenres = Image.open(self.archivo)
-        #self.dibujo = ImageDraw.Draw(self.imagenres)
-
 
     def buscarContornos(self):
         hsv = cv2.cvtColor(self.imagen, cv2.COLOR_BGR2HSV)
@@ -69,11 +58,10 @@ class Montecarlo:
 
         # Difuminamos la mascara para suavizar los contornos y aplicamos filtro canny
         blur = cv2.GaussianBlur(mask, (5, 5), 0)
-        edges = cv2.Canny(mask, 1, 2)
+        edges = cv2.Canny(blur, 1, 2)
 
-        # Si el area blanca de la mascara es superior a 500px, no se trata de ruido
+        # Extracción de contornos por figura
         _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        #contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours, mask
 
@@ -81,25 +69,15 @@ class Montecarlo:
         areas = [cv2.contourArea(c) for c in contours]
         i = 0
         for extension in areas:
-            # if extension > 600:
             actual = contours[i]
             approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
-            #cv2.drawContours(self.imagen, [actual], 0, (0, 0, 255), 2)
-            #cv2.drawContours(mask, [actual], 0, (0, 0, 255), 2)
             i = i + 1
             print('-----------------Coordenadas----------------')
             print('Figura ' + str(i) + ': ')
             print(str(approx).replace('[[', '(').replace(']]', ')').replace('([', ' (').replace(')]', ')'))
-            print()        
+            print()
 
-
-    def calcularCentros(self, contours):
-
-
-        # fuente = ImageFont.truetype("Arabic Magic.ttf", 40)
-        # Metodo para encontrar el maximo y el minimo en x,y de todas las figuras
-        experiments = 1000
-
+    def calcularCentros(self, contours, experiments):
         for actual in contours:
             if cv2.contourArea(actual) > 10:
                 approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
@@ -115,7 +93,6 @@ class Montecarlo:
                         ymax = points[:, 1]
                     if ymin > points[:, 1]:
                         ymin = points[:, 1]
-                # print('xmax '+str(xmax)+'ymax '+str(ymax)+'xmin '+str(xmin)+'ymin '+str(ymin))
                 self.esquinasFiguras.append([xmin, ymin, xmax, ymax])
                 if xmax - xmin > ymax - ymin:
                     differencemax = (xmax - xmin / 2) + 10
@@ -124,9 +101,11 @@ class Montecarlo:
                 randomDictionary = {}
                 for i in range(experiments):
                     distancelist = []
+
                     # Se genera un punto aleatorio (x,y)
                     xa = randint(xmin, xmax)
                     ya = randint(ymin, ymax)
+
                     # Se calculan las distancias entre el punto aleatorio y los puntos de referencia
                     for p in approx:
                         distance = math.sqrt(pow(p[:, 0] - xa, 2) + pow(p[:, 1] - ya, 2))
@@ -135,43 +114,32 @@ class Montecarlo:
                     if (max(distancelist) - min(distancelist)) <= differencemax:
                         randomDictionary[xa] = [ya]
                 pointslist = randomDictionary.items()
+
                 # Se calcula el promedio de los puntos validos
                 summationx = 0
                 summationy = 0
-                # print('longitud lista '+str(len(pointslist)))
                 for x, y in pointslist:
-                    # print(str(y[0]))
                     summationx += x
                     summationy += y[0]
                 averagex = summationx / len(pointslist)
                 averagey = summationy / len(pointslist)
 
                 print('Centro geometrico -> x: ' + str(averagex) + 'y: ' + str(averagey))
-                # dibujo.point((averagex, averagey), fill="white")
-                # dibujo.text((averagex, averagey), '(' + str(averagex) + ',' + str(averagey) + ')',
-                #             font=None, fill=(255, 255, 255, 255))
-                #self.dibujo.text((averagex, averagey), 'x', fill="black")
                 self.centrosGeometricos.append([averagex, averagey])
 
-
-        #self.imagenres.save("linea.png")
-        #self.imagenres = cv2.imread('linea.png')
-
-    def procesar(self, rutaImagen):
-
+    def procesar(self, rutaImagen, experiments):
         self.abrirImagen(rutaImagen)
         contours, mask = self.buscarContornos()
         self.calcularAreas(contours, mask)
-        self.calcularCentros(contours)
-        
+        self.calcularCentros(contours, experiments)
+
         cv2.namedWindow("Centros geometricos")
-        cv2.setMouseCallback( "Centros geometricos", self.mouse);
+        cv2.setMouseCallback("Centros geometricos", self.mouse)
         # Salir con ESC
         while(1):
             # Mostrar la mascara final y la imagen
-            #cv2.imshow('Figuras detectadas', mask)
+            # cv2.imshow('Figuras detectadas', mask)
             cv2.imshow('Centros geometricos', self.imagen)
-            #cv2.imshow('Centros geometricos', self.imagenres)
             tecla = cv2.waitKey(5) & 0xFF
             if tecla == 27:
                 break
@@ -180,15 +148,13 @@ class Montecarlo:
 
     def mouse(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-
-            #inicializamos el dibujo
+            # inicializamos el dibujo
             imagenres = Image.open(self.archivo)
             dibujo = ImageDraw.Draw(imagenres)
 
-            #print self.areas[0][0][0]
             i = 0
             for esquina in self.esquinasFiguras:
-                if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]: # El clic esta dentro del perimetro
+                if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]:  # El clic esta dentro del perimetro
                     centro = self.centrosGeometricos[i]
                     dibujo.text((centro[0], centro[1]), 'x', fill="black")
                     pass
@@ -200,12 +166,10 @@ class Montecarlo:
             self.imagen = cv2.imread('linea.png')
 
 
-            
-
-
-
-
-
 montecarlo = Montecarlo()
-montecarlo.procesar('irregulares.jpg')
-#montecarlo.procesar('mapa4.png')
+montecarlo.procesar('irregulares.jpg', 1000)
+# montecarlo.procesar('colores.png', 1000)
+# montecarlo.procesar('cuadrado.png', 1000)
+# montecarlo.procesar('figuras.png', 1000)
+# montecarlo.procesar('mapa5.png', 1000)
+# montecarlo.procesar('rompecabezas3.jpg', 1000)
