@@ -61,7 +61,7 @@ class Montecarlo:
         blur = cv2.GaussianBlur(mask, (5, 5), 0)
         edges = cv2.Canny(blur, 1, 2)
 
-        # Extracción de contornos por figura
+        # Extraccion de contornos por figura
         _, contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         return contours, mask
@@ -162,6 +162,7 @@ class Montecarlo:
                 if x >= esquina[0] and x <= esquina[2] and y >= esquina[1] and y <= esquina[3]:
                     centro = self.centrosGeometricos[i]
                     dibujo.text((centro[0], centro[1]), 'x', fill="black")
+                    break
                     pass
                 pass
                 i += 1
