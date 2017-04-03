@@ -87,7 +87,7 @@ class Montecarlo:
                 approx = cv2.approxPolyDP(actual, 0.05 * cv2.arcLength(actual, True), True)
                 xmax = 0
                 ymax = 0
-                xmin, ymin, channels = self.imagen.shape
+                ymin, xmin, channels = self.imagen.shape
                 for points in approx:
                     if xmax < points[:, 0]:
                         xmax = points[:, 0]
